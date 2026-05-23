@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAMPHOTO | Film Archive</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+        
+        :root { --bg: #ffffff; --text: #111111; --gray: #999999; --ease: cubic-bezier(0.16, 1, 0.3, 1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; cursor: none; overflow-x: hidden; animation: fadeIn 1s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        a { text-decoration: none; color: inherit; }
+        .serif { font-family: 'Playfair Display', serif; }
+        
+        /* 胶片角标 */
+        .film-mark { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--text); margin-top: 15px; display: flex; justify-content: space-between; }
+        .film-mark span { color: var(--gray); }
+
+        /* ================= 杂志级高级文案排版 ================= */
+        .ed-block { display: flex; flex-direction: column; gap: 10px; z-index: 10; }
+        .ed-title { font-family: 'Playfair Display', serif; font-style: italic; font-size: 22px; color: var(--text); letter-spacing: 0.5px; }
+        .ed-text { font-family: 'Montserrat', sans-serif; font-size: 9px; line-height: 1.8; color: var(--gray); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 400; }
+        
+        /* 悬挂定位 */
+        .ed-left { position: absolute; right: calc(100% + 3vw); top: 10%; width: 220px; text-align: right; }
+        .ed-right { position: absolute; left: calc(100% + 3vw); top: 10%; width: 220px; text-align: left; }
+        .ed-center { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); width: 220px; text-align: center; }
+
+        /* ================= 交互光标 ================= */
+        #cursor-dot { position: fixed; width: 5px; height: 5px; background: var(--text); border-radius: 50%; pointer-events: none; z-index: 2000; transform: translate(-50%, -50%); transition: width 0.5s var(--ease), height 0.5s var(--ease); }
+        .cursor-active #cursor-dot { width: 60px; height: 60px; background: transparent; border: 1px solid rgba(0,0,0,0.15); }
+
+        /* ================= 导航栏 ================= */
+        .top-nav { position: fixed; top: 0; left: 0; width: 100%; height: 90px; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-between; align-items: center; padding: 0 5vw; z-index: 1500; border-bottom: 1px solid #f2f2f2; }
+        .logo { font-size: 18px; font-weight: 500; letter-spacing: 6px; text-transform: uppercase; font-family: 'Montserrat', sans-serif; }
+        .nav-links { display: flex; gap: 45px; }
+        .nav-links a { font-size: 10px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; transition: opacity 0.3s; }
+        .nav-links a.active { border-bottom: 1px solid #111; padding-bottom: 4px; }
+
+        /* ================= 核心图片动效 ================= */
+        .img-wrap { overflow: hidden; width: 100%; position: relative; background: #f4f4f4; clip-path: inset(100% 0 0 0); transition: clip-path 1.4s var(--ease); }
+        .img-wrap.reveal { clip-path: inset(0 0 0 0); }
+        .img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 2.5s var(--ease); transform: scale(1.03); }
+        .hover-area:hover .img-wrap img { transform: scale(1.08); }
+
+        /* ================= 排版通用类 ================= */
+        .film-section { padding: 140px 0 100px; }
+        .film-header { padding: 0 5vw; margin-bottom: 8vh; text-align: center; }
+        .film-header h2 { font-size: 4.5vw; font-weight: 400; line-height: 1; margin-bottom: 20px; letter-spacing: -1px; }
+        .film-header .meta { display: flex; justify-content: center; gap: 40px; font-size: 10px; font-weight: 500; color: var(--gray); letter-spacing: 3px; text-transform: uppercase; border-top: 1px solid #eee; padding-top: 20px; width: 60%; margin: 0 auto; }
+
+        .m-epic { width: 95vw; margin: 0 auto 15vh; position: relative; }
+        .m-epic .img-wrap { aspect-ratio: 21/9; }
+
+        /* ================= 1. ULTRAMAX 400 ================= */
+        .m-hero { width: 65vw; margin: 0 auto 15vh; position: relative; }
+        .m-hero .img-wrap { aspect-ratio: 4/5; }
+
+        .m-strip { display: flex; gap: 2vw; padding: 0 5vw; margin-bottom: 15vh; }
+        .m-strip .hover-area { flex: 1; }
+        .m-strip .img-wrap { aspect-ratio: 3/4; }
+
+        .m-cascade { padding: 0 8vw; margin-bottom: 15vh; display: flex; flex-direction: column; position: relative; }
+        .cascade-1 { width: 45%; align-self: flex-start; }
+        .cascade-2 { width: 42%; align-self: flex-end; margin-top: -10vh; } 
+        .cascade-3 { width: 55%; align-self: center; margin-top: 10vh; }
+        .m-cascade .img-wrap { aspect-ratio: 3/4; }
+
+        .m-lightbox { width: 85vw; margin: 0 auto 15vh; display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; background: #fff; padding: 2vw; box-shadow: 0 40px 100px rgba(0,0,0,0.03); }
+        .m-lightbox .img-wrap { aspect-ratio: 3/4; }
+
+        .m-large-landscape { width: 90vw; margin: 0 auto 15vh; position: relative; }
+        .m-large-landscape .img-wrap { aspect-ratio: 16/9; }
+
+        .m-solo-portrait { width: 45vw; margin: 0 auto 15vh; position: relative; }
+        .m-solo-portrait .img-wrap { aspect-ratio: 3/4; }
+
+        .m-finale { padding: 0 5vw; display: flex; flex-direction: column; gap: 10vh; }
+        .finale-v { width: 50vw; margin-left: 5vw; position: relative; }
+        .finale-v .img-wrap { aspect-ratio: 3/4; }
+        .finale-h { width: 90vw; align-self: flex-end; position: relative; }
+        .finale-h .img-wrap { aspect-ratio: 21/9; }
+
+        /* ================= 2. GOLD 200 ================= */
+        .g-hero { width: 85vw; margin: 0 auto 15vh; position: relative; }
+        .g-hero .img-wrap { aspect-ratio: 16/9; } 
+
+        .g-duo { display: flex; gap: 8vw; padding: 0 10vw; margin-bottom: 15vh; align-items: flex-start; position: relative; }
+        .g-duo-left { width: 55%; aspect-ratio: 3/4; position: relative; }
+        .g-duo-right { width: 45%; aspect-ratio: 4/5; margin-top: 15vh; position: relative; }
+
+        .g-solo { width: 60vw; margin: 0 auto 15vh; position: relative; }
+        .g-solo .img-wrap { aspect-ratio: 3/4; }
+
+        .g-filmstrip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1vw; padding: 0 2vw; margin-bottom: 15vh; }
+        .g-filmstrip .img-wrap { aspect-ratio: 3/4; }
+
+        .g-landscape-43 { width: 75vw; margin: 0 auto 15vh; position: relative; }
+        .g-landscape-43 .img-wrap { aspect-ratio: 4/3; }
+
+        .g-float { width: 40vw; margin: 0 auto 15vh; position: relative; }
+        .g-float .img-wrap { aspect-ratio: 4/5; }
+
+        .g-triptych { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; padding: 0 5vw; margin-top: 15vh; }
+        .g-triptych .img-wrap { aspect-ratio: 3/4; }
+
+        /* ================= 3. VISION3 5207 (电影卷) ================= */
+        .v-hero { width: 100vw; margin-bottom: 15vh; position: relative; }
+        .v-hero .img-wrap { aspect-ratio: 21/9; }
+
+        .v-triptych { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3vw; padding: 0 5vw; margin-bottom: 15vh; }
+        .v-triptych .img-wrap { aspect-ratio: 3/4; }
+
+        .v-stagger { display: flex; justify-content: space-between; padding: 0 10vw; margin-bottom: 15vh; align-items: flex-start; }
+        .v-stagger-left { width: 40%; aspect-ratio: 4/5; }
+        .v-stagger-right { width: 35%; aspect-ratio: 3/4; margin-top: 20vh; }
+
+        .v-finale-solo { width: 50vw; margin: 0 auto 10vh; position: relative; }
+        .v-finale-solo .img-wrap { aspect-ratio: 3/4; }
+
+        footer { padding: 80px 5vw; text-align: center; color: var(--gray); font-size: 10px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; border-top: 1px solid #f2f2f2; font-family: 'Montserrat', sans-serif; }
+
+        @media (max-width: 900px) {
+            .film-header h2 { font-size: 10vw; letter-spacing: 0; }
+            .film-header .meta { flex-direction: column; gap: 10px; width: 100%; border: none; }
+            .ed-left, .ed-right, .ed-center { position: static; width: 100%; text-align: center; margin-bottom: 20px; transform: none; }
+            .ed-block { align-items: center; }
+            .m-hero, .m-strip, .m-epic, .cascade-1, .cascade-2, .cascade-3, .m-lightbox, .m-large-landscape, .m-solo-portrait, .finale-v, .finale-h, .g-hero, .g-duo-left, .g-duo-right, .g-solo, .g-landscape-43, .g-float, .v-hero, .v-stagger-left, .v-stagger-right, .v-finale-solo { width: 100% !important; margin: 0 0 30px 0 !important; border: none !important; position: static !important; }
+            .m-strip, .g-duo, .v-stagger { flex-direction: column; gap: 30px; padding: 0 5vw; }
+            .m-cascade { padding: 0 5vw; margin-bottom: 10vh; }
+            .m-lightbox, .g-triptych, .v-triptych { grid-template-columns: 1fr; gap: 30px; padding: 0; box-shadow: none; }
+            .g-filmstrip { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 5vw; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor-dot"></div>
+
+    <header class="top-nav hover-area">
+        <a href="index.html" class="logo">BAMPHOTO</a>
+        <nav class="nav-links">
+            <a href="index.html">Campaign</a>
+            <a href="film.html" class="active">Film</a>
+            <a href="#">Studio</a>
+            <a href="#">Video</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- ================= 1. KODAK ULTRAMAX 400 ================= -->
+        <section class="film-section">
+            <div class="film-header">
+                <h2 class="serif">Kodak Ultramax 400</h2>
+                <div class="meta">
+                    <span>Format: 35MM</span>
+                    <span>Process: C-41</span>
+                    <span>Frames: 15 EXP</span>
+                </div>
+            </div>
+
+            <!-- Fig 24 -->
+            <div class="m-hero hover-area">
+                <div class="ed-block ed-left">
+                    <div class="ed-title">Grain Structure</div>
+                    <div class="ed-text">The true essence of analog lies in its unpredictability. Chemical reactions translating light into physical memory.</div>
+                </div>
+                <div class="img-wrap reveal"><img src="24.jpg"></div>
+                <div class="film-mark"><span>[ 24 ]</span> Primary Portrait</div>
+            </div>
+
+            <!-- Fig 25, 26 -->
+            <div class="m-strip">
+                <div class="hover-area"><div class="img-wrap reveal"><img src="25.jpg"></div><div class="film-mark"><span>[ 25 ]</span></div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="26.jpg"></div><div class="film-mark"><span>[ 26 ]</span></div></div>
+            </div>
+
+            <!-- Fig 27 -->
+            <div class="m-epic hover-area">
+                <div class="img-wrap reveal"><img src="27.jpg"></div>
+                <div class="film-mark"><span>[ 27 ]</span> Wide Horizon</div>
+            </div>
+
+            <!-- Fig 28, 29, 30 -->
+            <div class="m-cascade">
+                <div class="ed-block" style="position: absolute; top: 0; right: 5vw; text-align: right; width: 220px; z-index: 10;">
+                    <div class="ed-title">Exposure Latitude</div>
+                    <div class="ed-text">Ultramax handles highlights with a distinct warmth, allowing shadow details to breathe organically.</div>
+                </div>
+                <div class="cascade-1 hover-area"><div class="img-wrap reveal"><img src="28.jpg"></div><div class="film-mark"><span>[ 28 ]</span></div></div>
+                <div class="cascade-2 hover-area"><div class="img-wrap reveal"><img src="29.jpg"></div><div class="film-mark"><span>[ 29 ]</span></div></div>
+                <div class="cascade-3 hover-area"><div class="img-wrap reveal"><img src="30.jpg"></div><div class="film-mark"><span>[ 30 ]</span> Mid-roll Focus</div></div>
+            </div>
+
+            <!-- Fig 31-34 -->
+            <div class="m-lightbox">
+                <div class="hover-area"><div class="img-wrap reveal"><img src="31.jpg"></div><div class="film-mark"><span>[ 31 ]</span></div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="32.jpg"></div><div class="film-mark"><span>[ 32 ]</span></div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="33.jpg"></div><div class="film-mark"><span>[ 33 ]</span></div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="34.jpg"></div><div class="film-mark"><span>[ 34 ]</span></div></div>
+            </div>
+
+            <!-- Fig 35 -->
+            <div class="m-large-landscape hover-area">
+                <div class="img-wrap reveal"><img src="35.jpg"></div>
+                <div class="film-mark"><span>[ 35 ]</span> Texture & Light</div>
+            </div>
+
+            <!-- Fig 36 -->
+            <div class="m-solo-portrait hover-area">
+                <div class="ed-block ed-right">
+                    <div class="ed-title">Analog Form</div>
+                    <div class="ed-text">Capturing depth and emotion through cellulose acetate. The physical process defines the aesthetic.</div>
+                </div>
+                <div class="img-wrap reveal"><img src="36.jpg"></div>
+                <div class="film-mark" style="justify-content: center;"><span>[ 36 ]</span> Detail Study</div>
+            </div>
+
+            <!-- Fig 37, 38 -->
+            <div class="m-finale">
+                <div class="finale-v hover-area"><div class="img-wrap reveal"><img src="37.jpg"></div><div class="film-mark"><span>[ 37 ]</span> Penultimate Frame</div></div>
+                <div class="finale-h hover-area"><div class="img-wrap reveal"><img src="38.jpg"></div><div class="film-mark"><span>[ 38 ]</span> End of Roll — 400 ISO</div></div>
+            </div>
+        </section>
+
+        <!-- ================= 2. KODAK GOLD 200 ================= -->
+        <section class="film-section" style="border-top: 1px solid #f2f2f2; padding-top: 120px;">
+            <div class="film-header">
+                <h2 class="serif">Kodak Gold 200</h2>
+                <div class="meta">
+                    <span>Format: 35MM</span>
+                    <span>Tone: Warm Classic</span>
+                    <span>Frames: 13 EXP</span>
+                </div>
+            </div>
+
+            <!-- Fig 39 -->
+            <div class="g-hero hover-area">
+                <div class="img-wrap reveal"><img src="39.jpg"></div>
+                <div class="film-mark"><span>[ 39 ]</span> Warm Opening</div>
+            </div>
+
+            <!-- Fig 40, 41 -->
+            <div class="g-duo">
+                <div class="g-duo-left hover-area"><div class="img-wrap reveal"><img src="40.jpg"></div><div class="film-mark"><span>[ 40 ]</span></div></div>
+                <div class="g-duo-right hover-area"><div class="img-wrap reveal"><img src="41.jpg"></div><div class="film-mark"><span>[ 41 ]</span> Light Study</div></div>
+            </div>
+
+            <!-- Fig 42 -->
+            <div class="g-solo hover-area">
+                <div class="img-wrap reveal"><img src="42.jpg"></div>
+                <div class="film-mark" style="justify-content: center;"><span>[ 42 ]</span> Gold Series Main</div>
+            </div>
+
+            <!-- Fig 43-46 -->
+            <div class="g-filmstrip">
+                <div class="hover-area"><div class="img-wrap reveal"><img src="43.jpg"></div><div class="film-mark"><span>[ 43 ]</span></div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="44.jpg"></div><div class="film-mark"><span>[ 44 ]</span></div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="45.jpg"></div><div class="film-mark"><span>[ 45 ]</span></div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="46.jpg"></div><div class="film-mark"><span>[ 46 ]</span></div></div>
+            </div>
+
+            <!-- Fig 47 -->
+            <div class="g-landscape-43 hover-area">
+                <div class="img-wrap reveal"><img src="47.jpg"></div>
+                <div class="film-mark" style="justify-content: center;"><span>[ 47 ]</span> Classic 4:3 Spread</div>
+            </div>
+
+            <!-- Fig 48, 49 -->
+            <div class="m-cascade" style="padding: 0 15vw; margin-bottom: 15vh;">
+                <div class="cascade-1 hover-area" style="width: 45%;"><div class="img-wrap reveal"><img src="48.jpg"></div><div class="film-mark"><span>[ 48 ]</span></div></div>
+                <div class="cascade-2 hover-area" style="width: 45%;"><div class="img-wrap reveal"><img src="49.jpg"></div><div class="film-mark"><span>[ 49 ]</span></div></div>
+            </div>
+
+            <!-- Fig 50 -->
+            <div class="g-float hover-area">
+                <div class="ed-block ed-left">
+                    <div class="ed-title">Negative Space</div>
+                    <div class="ed-text">Utilizing shadows to frame the subject, highlighting the organic texture of the film stock.</div>
+                </div>
+                <div class="img-wrap reveal"><img src="50.jpg"></div>
+                <div class="film-mark" style="justify-content: center;"><span>[ 50 ]</span> Isolation</div>
+            </div>
+
+            <!-- Fig 51 -->
+            <div class="g-hero hover-area" style="margin-bottom: 0;">
+                <div class="img-wrap reveal"><img src="51.jpg"></div>
+                <div class="film-mark"><span>[ 51 ]</span> Evening Light</div>
+            </div>
+
+            <!-- Fig 52-54 -->
+            <div class="g-triptych">
+                <div class="hover-area"><div class="img-wrap reveal"><img src="52.jpg"></div><div class="film-mark"><span>[ 52 ]</span></div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="53.jpg"></div><div class="film-mark" style="justify-content: center;"><span>[ 53 ]</span> Sequence</div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="54.jpg"></div><div class="film-mark" style="flex-direction: row-reverse;"><span>[ 54 ]</span> End of Roll</div></div>
+            </div>
+        </section>
+
+        <!-- ================= 3. VISION3 5207 ================= -->
+        <section class="film-section" style="border-top: 1px solid #f2f2f2;">
+            <div class="film-header">
+                <!-- 纯粹电影卷命名 -->
+                <h2 class="serif">Vision3 5207</h2>
+                <div class="meta">
+                    <span>Format: Motion Picture</span>
+                    <span>Process: ECN-2</span>
+                    <span>Frames: 8 EXP</span>
+                </div>
+            </div>
+
+            <!-- Fig 55 -->
+            <div class="v-hero hover-area">
+                <div class="img-wrap reveal"><img src="55.jpg"></div>
+                <div class="film-mark" style="padding: 0 5vw;"><span>[ 55 ]</span> Cinematic Intro</div>
+            </div>
+
+            <!-- Fig 56-58 -->
+            <div class="v-triptych">
+                <div class="hover-area"><div class="img-wrap reveal"><img src="56.jpg"></div><div class="film-mark"><span>[ 56 ]</span></div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="57.jpg"></div><div class="film-mark" style="justify-content: center;"><span>[ 57 ]</span> Motion</div></div>
+                <div class="hover-area"><div class="img-wrap reveal"><img src="58.jpg"></div><div class="film-mark" style="flex-direction: row-reverse;"><span>[ 58 ]</span></div></div>
+            </div>
+
+            <!-- Fig 59-60 -->
+            <div class="v-stagger">
+                <div class="v-stagger-left hover-area">
+                    <div class="img-wrap reveal"><img src="59.jpg"></div>
+                    <div class="film-mark"><span>[ 59 ]</span> Scene A</div>
+                </div>
+                <div class="v-stagger-right hover-area">
+                    <div class="img-wrap reveal"><img src="60.jpg"></div>
+                    <div class="film-mark" style="text-align: right;"><span>[ 60 ]</span> Scene B</div>
+                </div>
+            </div>
+
+            <!-- Fig 61 -->
+            <div class="g-landscape-43 hover-area">
+                <div class="ed-block ed-right">
+                    <div class="ed-title">Cinematic Depth</div>
+                    <div class="ed-text">Vision3 5207 provides unmatched dynamic range, capturing the subtle roll-off from highlight to shadow.</div>
+                </div>
+                <div class="img-wrap reveal"><img src="61.jpg"></div>
+                <div class="film-mark" style="justify-content: center;"><span>[ 61 ]</span> 5207 Film</div>
+            </div>
+
+            <!-- Fig 62 -->
+            <div class="v-finale-solo hover-area">
+                <div class="img-wrap reveal"><img src="62.jpg"></div>
+                <div class="film-mark" style="justify-content: center; margin-top: 30px;"><span>[ 62 ]</span> End of Vision3 Series</div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- 版权修改为 2026 -->
+    <footer>© 2026 BAMPHOTO STUDIO — THE FILM ARCHIVE</footer>
+
+    <script>
+        const dot = document.getElementById('cursor-dot');
+        document.addEventListener('mousemove', (e) => {
+            dot.style.left = e.clientX + 'px'; dot.style.top = e.clientY + 'px';
+        });
+        document.querySelectorAll('.hover-area').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-active'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-active'));
+        });
+        const observer = new IntersectionObserver((es) => {
+            es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('reveal'); } });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.img-wrap').forEach(img => observer.observe(img));
+    </script>
+</body>
+</html>

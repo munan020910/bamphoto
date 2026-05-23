@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAMPHOTO | Campaign Archive</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+        
+        :root { --bg: #ffffff; --text: #111111; --gray: #888888; --ease: cubic-bezier(0.16, 1, 0.3, 1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { font-family: 'Jost', sans-serif; background-color: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; cursor: none; overflow-x: hidden; animation: fadeIn 1s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        a { text-decoration: none; color: inherit; }
+        .serif { font-family: 'Lora', serif; }
+        .micro-cap { font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--gray); margin-top: 15px; }
+
+        /* ================= 光标 ================= */
+        #cursor-dot { position: fixed; width: 5px; height: 5px; background: var(--text); border-radius: 50%; pointer-events: none; z-index: 2000; transform: translate(-50%, -50%); transition: width 0.5s var(--ease), height 0.5s var(--ease), border 0.5s; }
+        .cursor-active #cursor-dot { width: 55px; height: 55px; background: transparent; border: 1px solid rgba(0,0,0,0.15); }
+
+        /* ================= 导航栏 ================= */
+        .top-nav { position: fixed; top: 0; left: 0; width: 100%; height: 90px; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-between; align-items: center; padding: 0 5vw; z-index: 1500; border-bottom: 1px solid #f2f2f2; }
+        .logo { font-size: 20px; font-weight: 600; letter-spacing: 6px; text-transform: uppercase; }
+        .nav-links { display: flex; gap: 45px; }
+        .nav-links a { font-size: 11px; font-weight: 400; letter-spacing: 2.5px; text-transform: uppercase; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 0.4; }
+        .nav-links a.active { border-bottom: 1px solid #111; padding-bottom: 4px; }
+
+        /* ================= 动效 ================= */
+        .img-wrap { overflow: hidden; width: 100%; position: relative; background: #fcfcfc; clip-path: inset(100% 0 0 0); transition: clip-path 1.2s var(--ease); }
+        .img-wrap.reveal { clip-path: inset(0 0 0 0); }
+        .img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 2s var(--ease); transform: scale(1.02); }
+        .hover-area:hover .img-wrap img { transform: scale(1.08); }
+
+        /* ================= 排版模块定义 ================= */
+        .hero { padding: 120px 5vw 8vh; display: flex; flex-direction: column; align-items: center; }
+        .hero .img-wrap { width: 90vw; height: 85vh; }
+        .hero-title { width: 90vw; margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .hero-title h1 { font-size: 5vw; font-weight: 400; line-height: 1.2; }
+
+        .marquee-section { padding: 10vh 0; overflow: hidden; }
+        .marquee-track { display: flex; width: max-content; animation: scroll-left 45s linear infinite; }
+        .marquee-group { display: flex; gap: 5vw; padding-right: 5vw; }
+        .marquee-item { width: 22vw; aspect-ratio: 3/4; flex-shrink: 0; }
+        @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .post-marquee-landscape { padding: 5vh 10vw 10vh; display: flex; flex-direction: column; align-items: center; }
+        .post-marquee-landscape .img-wrap { width: 80vw; aspect-ratio: 16/9; }
+
+        .stagger-spread { padding: 10vh 8vw 15vh; display: flex; justify-content: space-between; align-items: flex-start; }
+        .stagger-left { width: 45%; aspect-ratio: 4/5; }
+        .stagger-right { width: 40%; aspect-ratio: 3/4; margin-top: 25vh; }
+
+        .cinematic { padding: 5vh 5vw 10vh; }
+        .cinematic .img-wrap { aspect-ratio: 21/9; }
+
+        .duo-vertical { padding: 8vh 15vw; display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; }
+        
+        .fragments-v2 { padding: 5vh 10vw; display: flex; flex-direction: column; align-items: center; }
+        .fragment-img-large { width: 85vw; margin-bottom: 20px; }
+        .fragment-img-large .img-wrap { aspect-ratio: 16/9; }
+
+        .cinematic-triptych { padding: 10vh 5vw; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5vw; }
+        
+        .solo-vertical { padding: 10vh 0 5vh; display: flex; justify-content: center; }
+        .solo-vertical .img-box { width: 80vw; aspect-ratio: 4/5; }
+
+        .asymmetric-row { padding: 10vh 5vw; display: flex; align-items: flex-end; gap: 4vw; }
+        .grand-finale { padding: 10vh 0 20vh; display: flex; flex-direction: column; align-items: center; }
+
+        footer { padding: 5vw; text-align: center; border-top: 1px solid #f2f2f2; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); }
+
+        @media (max-width: 900px) {
+            .top-nav .nav-links { display: none; }
+            .hero-title h1 { font-size: 10vw; }
+            .marquee-item { width: 65vw; }
+            .stagger-spread, .duo-vertical, .asymmetric-row, .cinematic-triptych { flex-direction: column; display: flex; gap: 40px; padding: 5vh 5vw; }
+            .stagger-left, .stagger-right, .solo-vertical .img-box, .fragment-img-large, .asymmetric-row div, .grand-finale .img-wrap { width: 100% !important; margin: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="cursor-dot"></div>
+    <header class="top-nav hover-area">
+        <a href="index.html" class="logo">BAMPHOTO</a>
+        <nav class="nav-links">
+            <a href="index.html" class="active">Campaign</a>
+            <a href="film.html">Film</a>
+            <a href="#">Studio</a>
+            <a href="#">Video</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Fig 01 -->
+        <section class="hero hover-area">
+            <div class="img-wrap reveal"><img src="1.jpg"></div>
+            <div class="hero-title">
+                <h1 class="serif">Campaign<br>No. 01</h1>
+                <div class="micro-cap">Opening Sequence</div>
+            </div>
+        </section>
+
+        <!-- Fig 02-09 (Marquee) -->
+        <section class="marquee-section">
+            <div class="marquee-track">
+                <div class="marquee-group">
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="2.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="3.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="4.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="5.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="6.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="7.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="8.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="9.jpg"></div></div>
+                </div>
+                <div class="marquee-group">
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="2.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="3.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="4.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="5.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="6.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="7.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="8.jpg"></div></div>
+                    <div class="marquee-item hover-area"><div class="img-wrap reveal"><img src="9.jpg"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fig 10 -->
+        <section class="post-marquee-landscape hover-area">
+            <div class="img-wrap reveal"><img src="10.jpg"></div>
+            <div class="micro-cap" style="text-align: center;">Fig. 10 — Transition</div>
+        </section>
+
+        <!-- Fig 11-12 -->
+        <section class="stagger-spread">
+            <div class="stagger-left hover-area">
+                <div class="img-wrap reveal"><img src="11.jpg"></div>
+                <div class="micro-cap" style="text-align: left;">Fig. 11</div>
+            </div>
+            <div class="stagger-right hover-area">
+                <div class="micro-cap" style="text-align: right; margin-bottom: 15px; margin-top: 0;">Fig. 12</div>
+                <div class="img-wrap reveal"><img src="12.jpg"></div>
+            </div>
+        </section>
+
+        <!-- Fig 13 -->
+        <section class="cinematic hover-area">
+            <div class="img-wrap reveal"><img src="13.jpg"></div>
+            <div class="micro-cap" style="text-align: center;">Fig. 13 — Horizon</div>
+        </section>
+
+        <!-- Fig 14-15 -->
+        <section class="duo-vertical">
+            <div class="hover-area">
+                <div class="img-wrap reveal"><img src="14.jpg"></div>
+                <div class="micro-cap" style="text-align: left;">Fig. 14</div>
+            </div>
+            <div class="hover-area">
+                <div class="img-wrap reveal"><img src="15.jpg"></div>
+                <div class="micro-cap" style="text-align: right;">Fig. 15</div>
+            </div>
+        </section>
+
+        <!-- Fig 16 (Material Essence) -->
+        <section class="fragments-v2">
+            <div class="fragment-img-large hover-area">
+                <div class="img-wrap reveal"><img src="16.jpg"></div>
+                <div class="micro-cap" style="text-align: center;">Fig. 16 — Material Essence</div>
+            </div>
+        </section>
+
+        <!-- Fig 17-19 (Moved Triptych) -->
+        <section class="cinematic-triptych">
+            <div class="hover-area">
+                <div class="img-wrap reveal" style="aspect-ratio: 16/9;"><img src="17.jpg"></div>
+                <div class="micro-cap">Fig. 17</div>
+            </div>
+            <div class="hover-area">
+                <div class="img-wrap reveal" style="aspect-ratio: 16/9;"><img src="18.jpg"></div>
+                <div class="micro-cap" style="text-align: center;">Fig. 18</div>
+            </div>
+            <div class="hover-area">
+                <div class="img-wrap reveal" style="aspect-ratio: 16/9;"><img src="19.jpg"></div>
+                <div class="micro-cap" style="text-align: right;">Fig. 19</div>
+            </div>
+        </section>
+
+        <!-- Fig 20 (Solo Portrait) -->
+        <section class="solo-vertical">
+            <div class="img-box hover-area">
+                <div class="img-wrap reveal"><img src="20.jpg"></div>
+                <div class="micro-cap" style="text-align: center;">Fig. 20 — Portrait Narrative</div>
+            </div>
+        </section>
+
+        <!-- Fig 21-22 -->
+        <section class="asymmetric-row">
+            <div style="width: 60%;" class="hover-area">
+                <div class="img-wrap reveal" style="aspect-ratio: 16/10;"><img src="21.jpg"></div>
+                <div class="micro-cap">Fig. 21 — Perspective</div>
+            </div>
+            <div style="width: 32%; margin-bottom: 8vh;" class="hover-area">
+                <div class="img-wrap reveal" style="aspect-ratio: 4/3;"><img src="22.jpg"></div>
+                <div class="micro-cap" style="text-align: right;">Fig. 22</div>
+            </div>
+        </section>
+
+        <!-- Fig 23 -->
+        <section class="grand-finale hover-area">
+            <div class="img-wrap reveal" style="width: 92vw; aspect-ratio: 21/9;"><img src="23.jpg"></div>
+            <div class="micro-cap" style="margin-top: 30px; letter-spacing: 5px;">Fig. 23 — Campaign Conclusion 2025</div>
+        </section>
+    </main>
+
+    <footer>© 2025 BAMPHOTO STUDIO — ALL RIGHTS RESERVED</footer>
+
+    <script>
+        const dot = document.getElementById('cursor-dot');
+        document.addEventListener('mousemove', (e) => { dot.style.left = e.clientX + 'px'; dot.style.top = e.clientY + 'px'; });
+        document.querySelectorAll('.hover-area').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-active'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-active'));
+        });
+        const obs = new IntersectionObserver((es) => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('reveal'); }), {threshold: 0.1});
+        document.querySelectorAll('.img-wrap').forEach(i => obs.observe(i));
+    </script>
+</body>
+</html>
